@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biology 20: Energy Flow Quiz</title>
+    <title>Biology 20 UA Ch.1,2 Energy and Matter Flow in the Biosphere</title>
     <style>
         /* Modern Background & General Setup */
         body {
@@ -25,6 +25,17 @@
             max-width: 700px;
             width: 90%;
             margin: 20px;
+        }
+
+        /* New Main Heading Styling */
+        .main-heading {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e6ea;
+            padding-bottom: 15px;
         }
 
         /* Colors to the questions */
@@ -116,6 +127,10 @@
             display: none;
         }
 
+        .score-container h2 {
+            margin-top: 0;
+        }
+
         .score-container h1 {
             color: #0d6efd;
             font-size: 2.5em;
@@ -131,6 +146,8 @@
 <body>
 
 <div class="quiz-container" id="quiz-container">
+    <h1 class="main-heading">Biology 20 UA Ch.1,2 Energy and Matter Flow in the Biosphere</h1>
+    
     <div class="progress" id="progress-text">Question 1 of 27</div>
     <h2 class="question-text" id="question-text">Question loading...</h2>
     
@@ -147,6 +164,7 @@
 </div>
 
 <div class="quiz-container score-container" id="score-container">
+    <h1 class="main-heading">Biology 20 UA Ch.1,2 Energy and Matter Flow in the Biosphere</h1>
     <h2>Quiz Complete!</h2>
     <p>Here is your final score:</p>
     <h1 id="final-score">0 / 27</h1>
