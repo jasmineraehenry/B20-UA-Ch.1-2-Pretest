@@ -12,9 +12,24 @@
             min-height: 100vh;
             margin: 0;
             display: flex;
+            flex-direction: column; /* Stacks the title and quiz vertically */
             justify-content: center;
             align-items: center;
             color: black; /* Text should be black */
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Highly Visible Page Title */
+        .page-title {
+            text-align: center;
+            color: #1a252f;
+            margin-top: 20px;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.7);
+            max-width: 900px;
         }
 
         .quiz-container {
@@ -23,19 +38,7 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             padding: 30px;
             max-width: 700px;
-            width: 90%;
-            margin: 20px;
-        }
-
-        /* New Main Heading Styling */
-        .main-heading {
-            text-align: center;
-            color: #2c3e50;
-            font-size: 1.8em;
-            margin-top: 0;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #e2e6ea;
-            padding-bottom: 15px;
+            width: 100%;
         }
 
         /* Colors to the questions */
@@ -145,9 +148,9 @@
 </head>
 <body>
 
+<h1 class="page-title">Biology 20 UA Ch.1,2 Energy and Matter Flow in the Biosphere</h1>
+
 <div class="quiz-container" id="quiz-container">
-    <h1 class="main-heading">Biology 20 UA Ch.1,2 Energy and Matter Flow in the Biosphere</h1>
-    
     <div class="progress" id="progress-text">Question 1 of 27</div>
     <h2 class="question-text" id="question-text">Question loading...</h2>
     
@@ -164,7 +167,6 @@
 </div>
 
 <div class="quiz-container score-container" id="score-container">
-    <h1 class="main-heading">Biology 20 UA Ch.1,2 Energy and Matter Flow in the Biosphere</h1>
     <h2>Quiz Complete!</h2>
     <p>Here is your final score:</p>
     <h1 id="final-score">0 / 27</h1>
