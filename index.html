@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biology 20: Energy Flow Quiz</title>
+    <style>
+        /* Modern Background & General Setup */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: black; /* Text should be black */
+        }
+
+        .quiz-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 30px;
+            max-width: 700px;
+            width: 90%;
+            margin: 20px;
+        }
+
+        /* Colors to the questions */
+        h2.question-text {
+            color: black;
+            border-left: 6px solid #ff6b6b; /* Colorful accent */
+            padding-left: 15px;
+            background-color: #fff0f0;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            border-radius: 0 8px 8px 0;
+            font-size: 1.3em;
+        }
+
+        .options-container {
+            margin-top: 20px;
+        }
+
+        .option-label {
+            display: block;
+            background-color: #f1f3f5;
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+
+        .option-label:hover {
+            background-color: #e2e6ea;
+        }
+
+        /* Hide actual radio buttons */
+        .option-label input[type="radio"] {
+            display: none;
+        }
+
+        /* Selected state styling */
+        .option-label.selected {
+            background-color: #e7f1ff;
+            border-color: #0d6efd;
+        }
+
+        .btn {
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1em;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background-color: #0b5ed7;
+        }
+
+        .btn:disabled {
+            background-color: #a5c8ff;
+            cursor: not-allowed;
+        }
+
+        /* Feedback styling */
+        .feedback-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .feedback-correct {
+            background-color: #d1e7dd;
+            border-left: 6px solid #198754;
+        }
+
+        .feedback-incorrect {
+            background-color: #f8d7da;
+            border-left: 6px solid #dc3545;
+        }
+
+        /* Score area styling */
+        .score-container {
+            text-align: center;
+            display: none;
+        }
+
+        .score-container h1 {
+            color: #0d6efd;
+            font-size: 2.5em;
+        }
+
+        .progress {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container" id="quiz-container">
+    <div class="progress" id="progress-text">Question 1 of 27</div>
+    <h2 class="question-text" id="question-text">Question loading...</h2>
+    
+    <div class="options-container" id="options-container">
+        </div>
+
+    <button class="btn" id="submit-btn" onclick="checkAnswer()">Submit Answer</button>
+    <button class="btn" id="next-btn" style="display: none;" onclick="nextQuestion()">Next Question</button>
+
+    <div class="feedback-area" id="feedback-area">
+        <strong id="feedback-status"></strong>
+        <p id="feedback-rationale" style="margin-top: 10px;"></p>
+    </div>
+</div>
+
+<div class="quiz-container score-container" id="score-container">
+    <h2>Quiz Complete!</h2>
+    <p>Here is your final score:</p>
+    <h1 id="final-score">0 / 27</h1>
+    <button class="btn" onclick="location.reload()">Retake Quiz</button>
+</div>
+
+<script>
+    // The JSON data containing the quiz questions
+    const quizData = [
+    {
+      "question": "A student builds a sealed glass terrarium containing soil, plants, and a few insects, and places it on a sunny windowsill. After several weeks, the organisms are thriving. How does the First Law of Thermodynamics apply to this scenario?",
+      "answerOptions": [
+        { "text": "The plants create new biological energy from the soil nutrients.", "rationale": "The First Law states that energy cannot be created, only transformed.", "isCorrect": false },
+        { "text": "Solar energy entering the glass is converted into chemical energy by the plants.", "rationale": "The First Law of Thermodynamics involves the transformation of energy from one form to another without creation or destruction; here, light energy becomes chemical potential energy.", "isCorrect": true },
+        { "text": "The insects destroy the chemical energy when they consume the plants.", "rationale": "Energy is not destroyed when consumed; it is transferred and transformed, partly into heat.", "isCorrect": false },
+        { "text": "The total energy inside the terrarium decreases over time as the insects move.", "rationale": "While usable energy decreases (Second Law), the First Law focuses on energy conversion, and energy leaves as heat. The conversion is the key application here.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "A provincial park manager observes that an area of grassland supports a population of 50,000 mice, but only a population of 50 hawks that prey on them. Which ecological principle best explains this dramatic reduction in population size at higher trophic levels?",
+      "answerOptions": [
+        { "text": "The decomposers immediately consume the energy before hawks can hunt.", "rationale": "Decomposers consume dead matter, they do not intercept the energy from living prey.", "isCorrect": false },
+        { "text": "The Second Law of Thermodynamics.", "rationale": "The Second Law states that with each energy transfer, some energy is lost as unusable heat, severely limiting the energy available for subsequent trophic levels.", "isCorrect": true },
+        { "text": "Hawks have a lower rate of cellular respiration than mice.", "rationale": "Hawks have high metabolic rates, and a lower rate wouldn't explain why fewer of them can be supported.", "isCorrect": false },
+        { "text": "The total rate of energy capture by plants in grasslands is generally very low.", "rationale": "Grasslands can have very high rates of energy capture; the limiting factor for the top predators is the cumulative energy loss through the food chain.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "In a coastal marine food web, sea otters act as a keystone species by consuming sea urchins, which graze heavily on kelp (the primary producer). If a disease drastically reduces the sea otter population, what is the most likely long-term consequence for the flow of energy in this ecosystem?",
+      "answerOptions": [
+        { "text": "The ecosystem will completely bypass the primary consumers and transfer solar energy directly to secondary consumers.", "rationale": "Secondary consumers (like carnivores) cannot perform photosynthesis to capture solar energy.", "isCorrect": false },
+        { "text": "The total rate at which solar energy is captured and converted into chemical energy will sharply decline as unchecked urchin populations overgraze and destroy the kelp forests.", "rationale": "Without otters to control them, urchin populations explode. They will consume the kelp faster than it can grow, drastically reducing the ecosystem's capacity to capture solar energy at the producer level.", "isCorrect": true },
+        { "text": "Energy transfer efficiency between the remaining trophic levels will increase to compensate for the loss of the otters.", "rationale": "Energy transfer efficiency is dictated by the laws of thermodynamics and cannot spontaneously increase to 'compensate' for a missing species.", "isCorrect": false },
+        { "text": "The total amount of solar energy reaching the ocean surface will decrease.", "rationale": "Biological changes in the food web do not alter the amount of solar radiation arriving from the sun.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "To reduce humanity's ecological footprint and maximize the efficiency of energy transfer from the sun to humans, which dietary shift would be most effective based on thermodynamic principles?",
+      "answerOptions": [
+        { "text": "Eating exclusively carnivorous fish like tuna.", "rationale": "Carnivorous fish are at high trophic levels, meaning maximum energy has been lost before reaching humans.", "isCorrect": false },
+        { "text": "Consuming mostly primary consumers like beef and lamb.", "rationale": "While better than eating top carnivores, eating primary consumers still involves a significant loss of energy (usually around 90%).", "isCorrect": false },
+        { "text": "Adopting a plant-based diet.", "rationale": "Eating plants positions humans as primary consumers, eliminating the massive energy loss that occurs at intermediate trophic levels.", "isCorrect": true },
+        { "text": "Increasing the intake of omnivorous animals like pigs.", "rationale": "Omnivores still represent a higher trophic level than plants, so more energy is lost in the transfer.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "In a forest ecosystem, an oak tree supports thousands of caterpillars, which in turn support dozens of blue jays. Which ecological pyramid representing this specific food chain would be inverted (wider at the top or middle than the bottom)?",
+      "answerOptions": [
+        { "text": "Pyramid of Energy", "rationale": "A pyramid of energy must always be upright, representing the inevitable loss of energy dictated by the laws of thermodynamics.", "isCorrect": false },
+        { "text": "Pyramid of Numbers", "rationale": "A single oak tree (1) supports thousands of caterpillars (1000s), making the base narrow and the middle wide, resulting in an inverted shape.", "isCorrect": true },
+        { "text": "Pyramid of Biomass", "rationale": "The total mass of the giant oak tree is far greater than the total mass of the caterpillars, so this pyramid would remain upright.", "isCorrect": false },
+        { "text": "Pyramid of Energy Production", "rationale": "The rate of energy generation must always follow the thermodynamic rule of decreasing at higher levels, maintaining an upright pyramid.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "A researcher is studying an aquatic ecosystem and notes that the Pyramid of Biomass is inverted. What is the most likely biological explanation for this phenomenon?",
+      "answerOptions": [
+        { "text": "The producers (phytoplankton) reproduce and are consumed so rapidly that their standing mass at any given moment is low.", "rationale": "In aquatic ecosystems, phytoplankton have a very high turnover rate. Even though their total energy capture over time is high, their biomass at a single snapshot in time is small because they are eaten instantly.", "isCorrect": true },
+        { "text": "The primary consumers are vastly more energy-efficient than the producers.", "rationale": "Energy transfer efficiency does not exceed the laws of thermodynamics; consumers cannot be more efficient than the producers they rely on.", "isCorrect": false },
+        { "text": "The top predators in this ecosystem possess an unusually low metabolic rate.", "rationale": "Metabolic rates of predators do not explain the inverted relationship between producers and primary consumers.", "isCorrect": false },
+        { "text": "Water absorbs solar energy poorly, drastically reducing the energy available to the lowest trophic level.", "rationale": "While water does absorb light, an inverted biomass pyramid is caused by the reproduction/consumption rate of producers, not an absolute lack of energy.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "If a field of wheat captures 10,000 J of solar energy through photosynthesis, approximately how much of that original energy will be incorporated into the tissues of a secondary consumer (e.g., a human eating a chicken that ate the wheat)?",
+      "answerOptions": [
+        { "text": "1,000 J", "rationale": "This amount would be expected in the primary consumer (the chicken), representing a 10% transfer.", "isCorrect": false },
+        { "text": "100 J", "rationale": "Applying the 10% rule twice: the chicken gets roughly 1,000 J, and the human (secondary consumer) gets roughly 100 J.", "isCorrect": true },
+        { "text": "10 J", "rationale": "This would represent the energy available to a tertiary consumer.", "isCorrect": false },
+        { "text": "9,000 J", "rationale": "This represents the energy lost as heat and waste during the first transfer, not the energy retained by the secondary consumer.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "In 1977, scientists discovered thriving ecosystems around deep-sea hydrothermal vents, completely devoid of sunlight. How does energy enter the biosphere in these extreme environments?",
+      "answerOptions": [
+        { "text": "Through heterotrophic consumption of detritus falling from the ocean surface.", "rationale": "While 'marine snow' does fall, the vent ecosystems are primarily supported by their own local energy source.", "isCorrect": false },
+        { "text": "Through the absorption of geothermal heat directly into the metabolic pathways of fish.", "rationale": "Animals cannot directly utilize heat to build organic molecules; heat is the end product of energy transformations, not a usable source for biosynthesis.", "isCorrect": false },
+        { "text": "Through chemosynthesis, where bacteria use energy from inorganic molecules like hydrogen sulfide to build organic compounds.", "rationale": "Chemosynthetic bacteria act as the producers in these environments, oxidizing inorganic compounds from the vents to produce usable chemical energy.", "isCorrect": true },
+        { "text": "Through highly efficient photosynthesis utilizing bioluminescence from deep-sea predators.", "rationale": "Bioluminescence does not provide enough continuous, widespread energy to support an entire ecosystem's initial energy capture.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "A massive deforestation event occurs in the Amazon rainforest to clear land for cattle ranching. What is the most immediate impact on the energy flow in that specific localized environment?",
+      "answerOptions": [
+        { "text": "An immediate increase in the total rate of solar energy captured by the ecosystem's producers.", "rationale": "Removing the trees (the primary producers) would drastically decrease, not increase, the rate at which energy is captured.", "isCorrect": false },
+        { "text": "A severe reduction in the total amount of solar energy captured and converted into chemical energy.", "rationale": "Trees are the primary solar energy converters in the forest. Removing them eliminates the mechanism by which energy enters the local food web.", "isCorrect": true },
+        { "text": "A reversal in the direction of energy flow, moving from decomposers back to producers.", "rationale": "Energy flow in ecosystems is strictly one-way (from the sun through trophic levels); it cannot flow backward.", "isCorrect": false },
+        { "text": "An increase in the thermodynamic efficiency of the remaining primary consumers.", "rationale": "Thermodynamic efficiency is a physiological constraint and does not increase simply because producers are removed.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "Which of the following explains why a Pyramid of Energy can never be inverted in a functional ecosystem?",
+      "answerOptions": [
+        { "text": "Producers always have a larger physical size than top predators.", "rationale": "This is often false (e.g., microscopic algae vs. a whale) and relates to a pyramid of numbers or biomass, not energy.", "isCorrect": false },
+        { "text": "The First Law of Thermodynamics dictates that energy is constantly created by producers.", "rationale": "The First Law states energy cannot be created, only transformed.", "isCorrect": false },
+        { "text": "The Second Law of Thermodynamics ensures that usable energy is lost as heat with each trophic transfer.", "rationale": "Because of entropy and heat loss during cellular respiration and daily activities, each trophic level inevitably has less total energy than the one below it.", "isCorrect": true },
+        { "text": "Decomposers consume more energy than any other trophic level combined.", "rationale": "While decomposers process a lot of energy, the non-inversion of the pyramid is dictated by the fundamental physical laws of energy transfer.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "A student analyzes an ecological footprint and notes that producing 1 kg of beef requires significantly more land and solar energy input than producing 1 kg of soybeans. Which ecological concept best justifies this difference?",
+      "answerOptions": [
+        { "text": "Trophic level energy loss.", "rationale": "Cattle are consumers; energy is lost as heat and waste when they eat plants, requiring massive amounts of plant energy (and thus land/sunlight) to yield a small amount of meat.", "isCorrect": true },
+        { "text": "The total amount of solar energy initially converted to chemical energy by soybeans is inherently lower than that of grass.", "rationale": "Even if this were true, it would not explain why the consumer (beef) requires vastly more input than the producer (soybean).", "isCorrect": false },
+        { "text": "Chemosynthesis in soil bacteria.", "rationale": "Chemosynthesis is not the primary driver of agricultural production; photosynthesis is.", "isCorrect": false },
+        { "text": "The First Law of Thermodynamics.", "rationale": "While energy is conserved, it is the Second Law (loss of usable energy) that explains the inefficiency of higher trophic levels.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "Only a tiny fraction (roughly 1% to 2%) of the total solar energy that reaches the Earth's atmosphere is actually captured by producers for photosynthesis. Which of the following is NOT a reason for this low efficiency?",
+      "answerOptions": [
+        { "text": "Much of the light is reflected by clouds or the Earth's surface.", "rationale": "Reflection does prevent a large amount of solar energy from reaching chloroplasts.", "isCorrect": false },
+        { "text": "Some of the light is absorbed by the atmosphere and converted to heat.", "rationale": "Atmospheric absorption is a major factor in reducing the energy available at the surface.", "isCorrect": false },
+        { "text": "Plants can only utilize specific wavelengths of visible light.", "rationale": "Chlorophyll only absorbs specific wavelengths (like red and blue), letting green and other non-visible spectrums pass or reflect.", "isCorrect": false },
+        { "text": "Cellular respiration in the sun destroys the remaining energy before it reaches Earth.", "rationale": "The sun undergoes nuclear fusion, not cellular respiration, and energy is never 'destroyed' according to the First Law of Thermodynamics.", "isCorrect": true }
+      ]
+    },
+    {
+      "question": "Ecologists measure the total amount of solar energy captured by a forest's producers over a year. However, when they measure the actual energy stored as new plant biomass over that same year, the amount is significantly lower. What accounts for the difference between the total energy initially captured and the energy that ultimately remains stored as plant tissue?",
+      "answerOptions": [
+        { "text": "Energy that failed to reach the chloroplasts due to reflection.", "rationale": "Reflection prevents energy from being captured in the first place; it is not the difference between what is captured and what is stored.", "isCorrect": false },
+        { "text": "Energy consumed by the primary consumers.", "rationale": "Primary consumers eat the stored biomass, they do not account for the energy lost by the plants prior to storage.", "isCorrect": false },
+        { "text": "Energy used by the producers themselves to fuel their own cellular respiration.", "rationale": "Plants must use a portion of the total energy they capture to power their own life processes, releasing it as heat. The remainder is the energy stored as new biomass.", "isCorrect": true },
+        { "text": "Energy lost to the surrounding environment through chemosynthesis.", "rationale": "Chemosynthesis is a method of primary production, not a mechanism of energy loss for photosynthetic plants.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "An ecologist compares a highly diverse tropical rainforest food web with a simplified, heavily managed agricultural food chain (e.g., Sun -> Corn -> Cow -> Human). From a thermodynamic and ecological perspective, how does the complex food web respond differently to an environmental disturbance, such as a localized drought that reduces one plant species?",
+      "answerOptions": [
+        { "text": "It suspends the Second Law of Thermodynamics to conserve energy until conditions improve.", "rationale": "The laws of physics cannot be suspended by biological systems.", "isCorrect": false },
+        { "text": "It provides multiple alternative pathways for energy flow, maintaining ecosystem stability even if one producer declines.", "rationale": "A highly interconnected food web ensures that if one energy pathway is compromised, consumers have alternative food sources, preventing a total collapse of energy flow.", "isCorrect": true },
+        { "text": "It allows secondary consumers to temporarily act as primary producers to capture solar energy.", "rationale": "Animals lack the biological structures (chloroplasts) to perform photosynthesis.", "isCorrect": false },
+        { "text": "It completely prevents energy loss as heat at each trophic level to compensate for the disturbance.", "rationale": "Energy loss as heat is unavoidable in all trophic transfers due to the Second Law of Thermodynamics.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "Food chains rarely extend beyond four or five trophic levels (e.g., Producer -> Primary Consumer -> Secondary Consumer -> Tertiary Consumer). What is the primary thermodynamic reason for this limitation?",
+      "answerOptions": [
+        { "text": "Apex predators require too much physical space to hunt effectively.", "rationale": "While true, the need for space is a consequence of the underlying thermodynamic limitation, not the direct thermodynamic cause.", "isCorrect": false },
+        { "text": "Too much energy is lost as heat at each transfer, leaving insufficient energy to support a higher trophic level.", "rationale": "The cumulative loss of ~90% of energy at each step means that by the 5th level, there is almost zero usable energy left to support a viable population.", "isCorrect": true },
+        { "text": "Decomposers outcompete top predators for the remaining energy.", "rationale": "Decomposers process dead matter, they do not actively outcompete living apex predators for prey.", "isCorrect": false },
+        { "text": "Evolution has not yet had time to produce higher-level predators.", "rationale": "The limitation is based on physical laws of energy, not a lack of evolutionary time.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "Agricultural runoff causes a massive algal bloom in a lake. The algae block sunlight from reaching the submerged aquatic plants at the bottom of the lake. How will this specifically alter the energy flow in the benthic (bottom) zone?",
+      "answerOptions": [
+        { "text": "Benthic producers will switch from photosynthesis to chemosynthesis.", "rationale": "Most aquatic plants cannot spontaneously switch to chemosynthesis; they will simply die due to lack of light.", "isCorrect": false },
+        { "text": "The total capture of solar energy by bottom-dwelling producers will drop to near zero.", "rationale": "Without sunlight, the submerged plants cannot perform photosynthesis, stopping the entry of energy into the benthic food web.", "isCorrect": true },
+        { "text": "The benthic zone will become a closed system for energy.", "rationale": "It remains an open system (energy still tries to enter, and heat leaves), but the input of usable light energy is severely restricted.", "isCorrect": false },
+        { "text": "The energy transfer efficiency to benthic primary consumers will increase to 100%.", "rationale": "Efficiency cannot reach 100% due to the Second Law of Thermodynamics.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "A caterpillar consumes a leaf. What happens to the majority of the chemical energy contained within the leaf matter that the caterpillar ingests?",
+      "answerOptions": [
+        { "text": "It is successfully converted into new caterpillar biomass.", "rationale": "Only a small fraction (around 10%) is converted to new biomass.", "isCorrect": false },
+        { "text": "It is destroyed by the caterpillar's digestive enzymes.", "rationale": "Energy cannot be destroyed, only transformed.", "isCorrect": false },
+        { "text": "It is excreted as waste (feces) and lost as heat during cellular respiration.", "rationale": "The vast majority of ingested energy goes undigested (feces) or is burned for the caterpillar's immediate metabolic needs, releasing heat.", "isCorrect": true },
+        { "text": "It is stored as potential energy to be used by decomposers only.", "rationale": "While waste is used by decomposers, heat is also lost, and not all of it is stored for decomposers.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "Biosphere 2 was an ambitious experiment where scientists sealed themselves inside a massive glass structure to simulate a closed ecological system. For the experiment to succeed in keeping the occupants alive long-term, what was the only input it required from the outside world?",
+      "answerOptions": [
+        { "text": "Oxygen", "rationale": "Oxygen is matter. A true closed system must recycle its own matter.", "isCorrect": false },
+        { "text": "Water", "rationale": "Water is matter and must be recycled internally in a closed system.", "isCorrect": false },
+        { "text": "Sunlight", "rationale": "Because the Earth (and Biosphere 2) is a closed system for matter but open for energy, a continuous input of solar energy is required to drive photosynthesis and sustain life.", "isCorrect": true },
+        { "text": "Soil nutrients", "rationale": "Nutrients are matter and must be biologically cycled within the closed structure.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "When examining energy pathways, ecologists often note that endothermic (warm-blooded) predators generally support smaller population sizes than ectothermic (cold-blooded) predators of similar size and trophic level. Why is this?",
+      "answerOptions": [
+        { "text": "Endotherms spend a significantly larger portion of their assimilated energy maintaining a constant body temperature.", "rationale": "Warm-blooded animals burn a vast amount of energy for thermoregulation, leaving less energy for growth (biomass), meaning the ecosystem can support fewer of them.", "isCorrect": true },
+        { "text": "Ectotherms have a higher rate of cellular respiration.", "rationale": "Ectotherms generally have lower metabolic rates than endotherms.", "isCorrect": false },
+        { "text": "Endotherms violate the 10% rule by transferring energy backwards to producers.", "rationale": "Energy cannot be transferred backward against the flow of the food chain.", "isCorrect": false },
+        { "text": "Ectotherms are capable of absorbing solar energy directly for chemical metabolism.", "rationale": "While ectotherms absorb solar energy for heat, they cannot use it for chemical metabolism (they are not photosynthetic).", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "In a study of energy flow, scientists compare a desert ecosystem and a tropical rainforest. Both receive intense solar radiation. However, the energy entering the food web in the desert is vastly lower. What is the most likely limiting factor for energy capture in the desert?",
+      "answerOptions": [
+        { "text": "A high rate of energy loss from primary consumers due to extreme heat.", "rationale": "While animals do expend energy to stay cool, the primary reason for low *entry* of energy is at the producer level due to lack of water.", "isCorrect": false },
+        { "text": "A lack of available water, which restricts the amount of photosynthesis producers can perform.", "rationale": "Photosynthesis requires both sunlight and water. Without water, producers cannot capture the abundant solar energy, halting energy entry into the food web.", "isCorrect": true },
+        { "text": "Excessive chemosynthesis overshadowing photosynthesis.", "rationale": "Chemosynthesis is not a major factor in terrestrial desert ecosystems.", "isCorrect": false },
+        { "text": "The Second Law of Thermodynamics operating differently in arid climates.", "rationale": "The laws of thermodynamics are universal and do not change based on climate.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "If an invasive insect species is introduced to a forest and completely decimates the population of native herbivorous beetles, how will the flow of energy be immediately altered?",
+      "answerOptions": [
+        { "text": "The total energy captured by the forest producers will drop to zero.", "rationale": "Producers (trees/plants) will still capture solar energy, even if the primary consumers are gone.", "isCorrect": false },
+        { "text": "Energy transfer to the secondary consumers that relied on the beetles will be severely reduced.", "rationale": "If the primary consumer (beetle) is removed, the predators that eat them lose their energy source, disrupting that pathway in the food web.", "isCorrect": true },
+        { "text": "The forest will transition from an open energy system to a closed energy system.", "rationale": "The Earth and its ecosystems remain open systems for energy regardless of species composition.", "isCorrect": false },
+        { "text": "The invasive insects will generate new energy to replace the loss.", "rationale": "Insects cannot generate energy; they can only consume it.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "During an El Niño event, warm surface waters suppress the upwelling of cold, nutrient-rich water off the coast of South America. This causes a crash in the phytoplankton population. Which statement accurately describes the thermodynamic consequence?",
+      "answerOptions": [
+        { "text": "The First Law is violated as energy simply vanishes from the ocean.", "rationale": "Energy never vanishes; it simply is not captured biologically.", "isCorrect": false },
+        { "text": "The inverted Pyramid of Biomass will abruptly flip to an upright orientation.", "rationale": "A crash in phytoplankton would just collapse the base, likely crashing the whole pyramid, not necessarily flipping it upright in a stable way.", "isCorrect": false },
+        { "text": "The drastic reduction in the rate at which solar energy is captured by producers creates a massive energy deficit that travels up the food web.", "rationale": "Phytoplankton are the producers. Less producers means less solar energy is captured as chemical energy, starving all higher trophic levels.", "isCorrect": true },
+        { "text": "Secondary consumers will adapt by directly utilizing solar energy.", "rationale": "Animals do not possess the biological machinery to perform photosynthesis.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "Which crucial biological process serves as the primary 'bridge' transferring the sun's energy into a format that can be utilized by the vast majority of the biosphere?",
+      "answerOptions": [
+        { "text": "Cellular Respiration", "rationale": "Respiration releases energy from food; it does not capture it from the sun.", "isCorrect": false },
+        { "text": "Photosynthesis", "rationale": "Photosynthesis is the fundamental process that transforms electromagnetic solar energy into chemical bond energy (glucose), making it usable for the rest of the food web.", "isCorrect": true },
+        { "text": "Chemosynthesis", "rationale": "While important in specific niches (like deep sea vents), it captures chemical energy, not solar energy.", "isCorrect": false },
+        { "text": "Thermal Regulation", "rationale": "Thermal regulation is how organisms manage heat, not how they bring new energy into the food web.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "A wildlife biologist is tracking a group of gray wolves (Canis lupus) that live, hunt, and reproduce together in Yellowstone National Park. Which level of ecological organization does this specific group of wolves represent?",
+      "answerOptions": [
+        { "text": "Organism", "rationale": "An organism is a single living individual, whereas this scenario describes a group of individuals.", "isCorrect": false },
+        { "text": "Population", "rationale": "A population is defined as a group of individuals of the exact same species living in a specific geographical area at the same time.", "isCorrect": true },
+        { "text": "Community", "rationale": "A community must include multiple interacting populations of different species (e.g., wolves, elk, and trees).", "isCorrect": false },
+        { "text": "Ecosystem", "rationale": "An ecosystem includes both the living community and the non-living (abiotic) physical environment.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "An ecologist maps the interactions between the oak trees, squirrels, predatory hawks, and soil fungi within a specific woodland area. They intentionally exclude data on the soil's mineral content and annual rainfall. Which ecological level is the primary focus of this study?",
+      "answerOptions": [
+        { "text": "Population", "rationale": "A population consists of only one species, but this study involves multiple species (trees, squirrels, hawks, fungi).", "isCorrect": false },
+        { "text": "Community", "rationale": "A community represents all the different interacting populations (living things) in a specific area, which aligns perfectly with this study.", "isCorrect": true },
+        { "text": "Ecosystem", "rationale": "By deliberately excluding the abiotic factors (minerals, rainfall), the ecologist is not studying the full ecosystem.", "isCorrect": false },
+        { "text": "Biosphere", "rationale": "The biosphere encompasses all ecosystems on Earth, not just a single woodland area.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "A research team is investigating how an unexpected increase in river water salinity (salt content) affects the breeding success of native salmon and the subsequent availability of food for local bears. By examining both the living organisms and the physical water conditions, what level of organization are they studying?",
+      "answerOptions": [
+        { "text": "Population", "rationale": "The study involves multiple species (salmon, bears) and non-living factors, which goes beyond a single population.", "isCorrect": false },
+        { "text": "Community", "rationale": "While it includes the living community (salmon, bears), the inclusion of the abiotic factor (water salinity) elevates it to the next level.", "isCorrect": false },
+        { "text": "Ecosystem", "rationale": "An ecosystem encompasses the complex interactions between the biotic community (salmon, bears) and their abiotic environment (salinity of the river).", "isCorrect": true },
+        { "text": "Biome", "rationale": "A biome is a large, regional geographical area characterized by its climate and dominant vegetation, which is broader than a specific river study.", "isCorrect": false }
+      ]
+    },
+    {
+      "question": "In a local lake, agricultural runoff introduces trace amounts of a persistent, fat-soluble pesticide. While the concentration in the water is barely measurable, a study reveals that the osprey (a predatory fish-eating bird) living near the lake have dangerously high levels of the pesticide in their bodies. What ecological process is responsible for this phenomenon?",
+      "answerOptions": [
+        { "text": "Trophic Cascade", "rationale": "A trophic cascade refers to indirect population changes triggered by the addition or removal of top predators, not the progressive concentration of toxins.", "isCorrect": false },
+        { "text": "Biomagnification", "rationale": "Biomagnification (or bioamplification) is the process where the concentration of a toxin increases at each successive trophic level because it is stored in tissues and cannot be easily excreted.", "isCorrect": true },
+        { "text": "Bioremediation", "rationale": "Bioremediation is a human-managed process using organisms (like bacteria) to deliberately clean up pollutants.", "isCorrect": false },
+        { "text": "Eutrophication", "rationale": "Eutrophication is the over-enrichment of a water body with nutrients (often causing algal blooms), not the concentration of toxins in predators.", "isCorrect": false }
+      ]
+    }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let answered = false;
+
+    // DOM Elements
+    const questionText = document.getElementById("question-text");
+    const optionsContainer = document.getElementById("options-container");
+    const progressText = document.getElementById("progress-text");
+    const submitBtn = document.getElementById("submit-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const feedbackArea = document.getElementById("feedback-area");
+    const feedbackStatus = document.getElementById("feedback-status");
+    const feedbackRationale = document.getElementById("feedback-rationale");
+
+    function loadQuestion() {
+        answered = false;
+        const currentQ = quizData[currentQuestionIndex];
+        
+        progressText.innerText = `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
+        questionText.innerText = currentQ.question;
+        
+        // Reset and populate options
+        optionsContainer.innerHTML = "";
+        currentQ.answerOptions.forEach((option, index) => {
+            const label = document.createElement("label");
+            label.className = "option-label";
+            label.innerHTML = `
+                <input type="radio" name="quiz-option" value="${index}">
+                ${option.text}
+            `;
+            // Add click event to handle highlighting selection
+            label.onclick = function() {
+                if (!answered) {
+                    document.querySelectorAll('.option-label').forEach(el => el.classList.remove('selected'));
+                    label.classList.add('selected');
+                    label.querySelector('input').checked = true;
+                }
+            };
+            optionsContainer.appendChild(label);
+        });
+
+        // Reset UI elements
+        submitBtn.style.display = "inline-block";
+        submitBtn.disabled = false;
+        nextBtn.style.display = "none";
+        feedbackArea.style.display = "none";
+        feedbackArea.className = "feedback-area";
+    }
+
+    function checkAnswer() {
+        const selectedOption = document.querySelector('input[name="quiz-option"]:checked');
+        
+        if (!selectedOption) {
+            alert("Please select an answer before submitting!");
+            return;
+        }
+
+        answered = true;
+        submitBtn.disabled = true;
+        submitBtn.style.display = "none";
+        
+        const selectedIndex = parseInt(selectedOption.value);
+        const currentQ = quizData[currentQuestionIndex];
+        const chosenAnswer = currentQ.answerOptions[selectedIndex];
+        
+        // Disable all clicks on options
+        document.querySelectorAll('.option-label').forEach(el => el.style.pointerEvents = "none");
+
+        // Provide Feedback
+        feedbackArea.style.display = "block";
+        feedbackRationale.innerText = chosenAnswer.rationale;
+
+        if (chosenAnswer.isCorrect) {
+            score++;
+            feedbackArea.classList.add("feedback-correct");
+            feedbackStatus.innerText = "Correct!";
+            feedbackStatus.style.color = "#198754";
+        } else {
+            feedbackArea.classList.add("feedback-incorrect");
+            feedbackStatus.innerText = "Incorrect.";
+            feedbackStatus.style.color = "#dc3545";
+        }
+
+        nextBtn.style.display = "inline-block";
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        
+        if (currentQuestionIndex < quizData.length) {
+            loadQuestion();
+        } else {
+            showFinalScore();
+        }
+    }
+
+    function showFinalScore() {
+        document.getElementById("quiz-container").style.display = "none";
+        document.getElementById("score-container").style.display = "block";
+        document.getElementById("final-score").innerText = `${score} / ${quizData.length}`;
+    }
+
+    // Initialize Quiz
+    loadQuestion();
+</script>
+
+</body>
+</html>
